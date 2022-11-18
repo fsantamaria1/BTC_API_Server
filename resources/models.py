@@ -27,4 +27,4 @@ class Timesheet(db.Model):
     notes = db.Column(db.String(251))
     signature = db.Column(db.String(45))
     complete = db.Column(db.Boolean, default=False)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.String(50))
