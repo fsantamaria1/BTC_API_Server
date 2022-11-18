@@ -1,6 +1,10 @@
-from __init__ import create_app
+from server import create_app, configuration
 
 try:
-    app = create_app()
+    #Run in development mode
+    app = create_app(configuration_mode=configuration.Dev)
 except:
     print("Error")
+
+if __name__ == '__main__':
+    app.run()
