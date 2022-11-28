@@ -49,4 +49,62 @@ def create_user():
     else:
         return messages.UserAlreadyExists()
 
+@app.route('/user/<public_id>', methods=['GET'])
+def get_one_user(public_id):
 
+    user = User.query.filter_by(public_id=public_id).first()
+
+    if not user:
+        return messages.UserDoesNotExist()
+
+    user_data = {}
+    user_data['public_id'] = user.public_id
+    user_data['username'] = user.username
+    user_data['password'] = user.password
+    user_data['manager'] = user.manager
+    user_data['admin'] = user.admin
+    user_data['active'] = user.active
+
+    return jsonify({'user': user_data})
+
+@app.route('/user/<public_id>', methods=['PUT'])
+def promote_user(public_id):
+
+    #Get data from request
+    try:
+        data = request.get_json()
+        if not data.get("promotion"):
+            return messages.NoPromotionFound()
+    except:
+         return messages.NoDataFound()
+
+    #Query database to see if user exists
+    user = User.query.filter_by(public_id=public_id).first()
+
+    if not user:
+        return messages.UserDoesNotExist()
+
+    #Promote User 
+    if data.get("promotion") == "admin":
+        user.admin = True
+    elif data.get("promotion") == "manager":
+        user.manager = True
+    elif data.get("promotion") == "inactive":
+        user.active = False
+    else:
+        return messages.NoValidPromotionFound()
+    db.session.commit()
+    return messages.UserPromoted()
+
+@app.route('/user/<public_id>', methods=['DELETE'])
+def delete_user(public_id):
+
+    user = User.query.filter_by(public_id=public_id).first()
+
+    if not user:
+        return messages.UserDoesNotExist()
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return messages.UserDeleted()
