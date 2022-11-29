@@ -2,18 +2,19 @@ from flask import request, jsonify
 from flask import current_app as app
 from server.resources import db, messages
 from server.resources.models import User
+from server.resources.decorators import token_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 
 @app.route('/user', methods=['GET'])
-def get_users():
+@token_required
+def get_users(current_user):
     users = User.query.all()
     output = []
     for user in users:
         user_data = {}
         user_data['public_id'] = user.public_id
         user_data['username'] = user.username
-        user_data['password'] = user.password
         user_data['manager'] = user.manager
         user_data['admin'] = user.admin
         user_data['active'] = user.active
@@ -21,7 +22,8 @@ def get_users():
     return jsonify({'users': output})
 
 @app.route('/user', methods=['POST'])
-def create_user():
+@token_required
+def create_user(current_user):
     try:
         # Get data from request
         data = request.get_json()
@@ -50,7 +52,8 @@ def create_user():
         return messages.UserAlreadyExists()
 
 @app.route('/user/<public_id>', methods=['GET'])
-def get_one_user(public_id):
+@token_required
+def get_one_user(current_user, public_id):
 
     user = User.query.filter_by(public_id=public_id).first()
 
@@ -68,7 +71,8 @@ def get_one_user(public_id):
     return jsonify({'user': user_data})
 
 @app.route('/user/<public_id>', methods=['PUT'])
-def promote_user(public_id):
+@token_required
+def promote_user(curren_user, public_id):
 
     #Get data from request
     try:
@@ -97,7 +101,8 @@ def promote_user(public_id):
     return messages.UserPromoted()
 
 @app.route('/user/<public_id>', methods=['DELETE'])
-def delete_user(public_id):
+@token_required
+def delete_user(current_user, public_id):
 
     user = User.query.filter_by(public_id=public_id).first()
 
