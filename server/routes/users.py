@@ -3,12 +3,18 @@ from flask import current_app as app
 from server.resources import db, messages
 from server.resources.models import User
 from server.resources.decorators import token_required
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import uuid
 
 @app.route('/user', methods=['GET'])
 @token_required
 def get_users(current_user):
+
+    if not current_user.admin:
+        return messages.CannotPerformThatAction()
+    elif not current_user.active:
+        return messages.CannotPerformThatAction()
+
     users = User.query.all()
     output = []
     for user in users:
@@ -24,6 +30,12 @@ def get_users(current_user):
 @app.route('/user', methods=['POST'])
 @token_required
 def create_user(current_user):
+
+    if not current_user.admin:
+        return messages.CannotPerformThatAction()
+    elif not current_user.active:
+        return messages.CannotPerformThatAction()
+
     try:
         # Get data from request
         data = request.get_json()
@@ -55,6 +67,11 @@ def create_user(current_user):
 @token_required
 def get_one_user(current_user, public_id):
 
+    if not current_user.admin:
+        return messages.CannotPerformThatAction()
+    elif not current_user.active:
+        return messages.CannotPerformThatAction()
+
     user = User.query.filter_by(public_id=public_id).first()
 
     if not user:
@@ -72,7 +89,12 @@ def get_one_user(current_user, public_id):
 
 @app.route('/user/<public_id>', methods=['PUT'])
 @token_required
-def promote_user(curren_user, public_id):
+def promote_user(current_user, public_id):
+
+    if not current_user.admin:
+        return messages.CannotPerformThatAction()
+    elif not current_user.active:
+        return messages.CannotPerformThatAction()
 
     #Get data from request
     try:
@@ -103,6 +125,11 @@ def promote_user(curren_user, public_id):
 @app.route('/user/<public_id>', methods=['DELETE'])
 @token_required
 def delete_user(current_user, public_id):
+
+    if not current_user.admin:
+        return messages.CannotPerformThatAction()
+    elif not current_user.active:
+        return messages.CannotPerformThatAction()
 
     user = User.query.filter_by(public_id=public_id).first()
 
