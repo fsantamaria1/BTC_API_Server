@@ -9,6 +9,7 @@ def create_app(configuration_mode):
     with app.app_context():
         # Server routes
         from server.routes import users
+        from server.routes import login
         # Create db if it doesn't exist
         db.create_all()
         return app
