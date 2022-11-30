@@ -10,6 +10,7 @@ def create_app(configuration_mode):
         # Server routes
         from server.routes import users
         from server.routes import login
+        from server.routes import timesheets
         # Create db if it doesn't exist
         db.create_all()
         return app
