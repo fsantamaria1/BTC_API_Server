@@ -4,7 +4,7 @@ from server.resources import messages, db
 from server.resources.models import Timesheet
 from server.resources.decorators import token_required
 import uuid
-from datetime import datetime
+from server.resources.date_parser import date_parser
 
 table_user_fields = [
     "division",
@@ -44,15 +44,20 @@ def create_timesheet(current_user):
 
     if not existing_timesheet:
 
+        #Convert string to datetime object
+        job_date_obj = date_parser().string_to_date(data["job_date"])
+        arrive_time_obj = date_parser().combine_date_and_time_strings(data["job_date"], data["arrive_time"])
+        left_time_obj = date_parser().combine_date_and_time_strings(data["job_date"], data["left_time"])
+
         #Create new user
         new_timesheet = Timesheet(public_id=str(uuid.uuid4()), 
         division=data["division"], 
         job_number=data["job_number"] , 
         work_order=data["work_order"], 
         address=data["address"],
-        job_date=datetime.strptime(data["job_date"], '%Y-%m-%d').date(),
-        arrive_time=datetime.strptime(data["arrive_time"], '%H:%M'),
-        left_time=datetime.strptime(data["left_time"], '%H:%M'),
+        job_date=job_date_obj,
+        arrive_time=arrive_time_obj,
+        left_time=left_time_obj,
         notes=data["notes"],
         signature=data["signature"],
         complete=data["complete"], 
