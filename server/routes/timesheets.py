@@ -33,7 +33,7 @@ def create_timesheet(current_user):
         # Loop through json to find missing data
         for field in table_user_fields:
             if not data.get(field):
-                message = messages.ApiMessage(401, f"Missing data: {field}")
+                message = messages.ApiMessage(401, "fail", {'title': f"Missing data: {field}"})
                 return message()
 
     except:
@@ -101,11 +101,13 @@ def get_all_timesheets(current_user):
         timesheet_data['user_id'] = timesheet.user_id
         output.append(timesheet_data)
 
-    return jsonify({"timesheets": output})
+    # return jsonify({"timesheets": output})
+    timesheet_data_message = messages.ApiMessage(200, "success", {"timesheets": output})
+    return timesheet_data_message()
 
 @app.route('/timesheets/<bi_number>', methods=['GET'])
 @token_required
-def get_one_timesheets(current_user, bi_number):
+def get_one_timesheet(current_user, bi_number):
 
     if (current_user.active):
         timesheet = Timesheet.query.filter_by(job_number=bi_number).first()
@@ -131,4 +133,20 @@ def get_one_timesheets(current_user, bi_number):
     timesheet_data['user_id'] = timesheet.user_id
     output.append(timesheet_data)
 
-    return jsonify({"timesheet": output})
+    # return jsonify({"timesheet": output})
+    timesheets_data_message = messages.ApiMessage(200, "success", {"timesheet": output})
+    return timesheets_data_message()
+
+@app.route('/timesheet/<bi_number>', methods=['DELETE'])
+@token_required
+def delete_timesheet(current_user, bi_number):
+    if (current_user.active) and (current_user.admin):
+        timesheet = Timesheet.query.filter_by(job_number=bi_number).first()
+        if not timesheet:
+            return messages.TimesheetDoesNotExists()
+        db.session.delete(timesheet)
+        db.session.commit()
+        timesheet_deleted_message = messages.ApiMessage(200, "success", None)
+        return timesheet_deleted_message()
+    else:
+        return messages.CannotPerformThatAction()

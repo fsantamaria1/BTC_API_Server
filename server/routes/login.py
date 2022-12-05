@@ -26,7 +26,9 @@ def login():
     if check_password_hash(user.password, auth.password):
         token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
 
-        return jsonify({'token': token})
+        # return jsonify({'token': token})
+        success_message = messages.ApiMessage(200, "success", {"token": token})
+        return success_message()
 
     # Password does not exist or is invalid
     return messages.InvalidCredentials()
